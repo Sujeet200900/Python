@@ -1,0 +1,129 @@
+# Python
+Python and Google sheet
+
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[5]:
+
+
+#pip install gspread
+#pip install --upgrade google-api-python-client oauth2client
+
+
+# In[10]:
+
+
+#import gspread
+#from oauth2client.service_account import ServiceAccountCredentials
+#import gspread
+import pandas as pd
+
+import gspread as gs
+from gspread_dataframe import set_with_dataframe
+
+
+# In[8]:
+
+
+# scope = ['https://www.googleapis.com/auth/drive']
+# credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+
+# gc = gspread.authorize(credentials)
+
+gc=gspread.service_account(filename:='test.json')
+
+
+# In[11]:
+
+
+# sps = gc.open('Test')
+
+# #first worksheet = 0
+# wks = sps.get_worksheet(0)
+
+# wks.update_cell(1,1,"importing data is working")
+
+# test = wks.cell(1,1).value + " and reading data is also working"
+
+# wks.update_cell(2,1,test)
+
+sh=gc.open_by_key('1crHTJ78SbHUrbTbmgre-PpkgC8eZFsINGwcj7Aqin0E')
+sheet= sh.worksheet('Sheet1')
+data= pd.DataFrame(sheet.get_all_values())
+
+
+# In[23]:
+
+
+
+#     sh = gc.open('Test')
+#     sheet = sh.worksheet('Test 1')
+#     DF = pd.DataFrame(sheet.get_all_values())
+    
+#     DF
+
+data.iloc[0:]
+
+
+# In[22]:
+
+
+data.columns
+
+
+# In[63]:
+
+
+data1=data[['bot_sent_date','customer_number','total_leads_calls_against_promoter']]
+
+
+# In[117]:
+
+
+data2=data1.iloc[1:]
+
+
+# In[125]:
+
+
+data_3=data2.groupby(['customer_number','bot_sent_date'])['total_leads_calls_against_promoter'].sum()
+
+
+# In[142]:
+
+
+data3 = data_3.reset_index()
+
+
+# In[143]:
+
+
+def paste_data_google_sheet(df, key, worksheet, add_data_row=1, add_data_col=1):
+    gc = gspread.service_account(filename='test.json')
+    sh = gc.open_by_key(key)
+    worksheet = sh.worksheet(worksheet)
+    print('Worksheet Connection Established')
+    worksheet.clear()
+    print('Worksheet Cleared')
+    set_with_dataframe(worksheet, df, row=add_data_row, col=add_data_col)
+    print('Data Inserted in Google Sheet')
+
+
+# In[144]:
+
+
+paste_data_google_sheet(data3,'1crHTJ78SbHUrbTbmgre-PpkgC8eZFsINGwcj7Aqin0E','paste_data',1,1)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
